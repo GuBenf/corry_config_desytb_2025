@@ -13,7 +13,7 @@ def runCorry(config, files, log, additional=None):
         log: Log file where the output will be saved.
         additional: Optional string with additional arguments to pass to the Corry program.
     # """
-    cmd = f'./corry -c {config} -o EventLoaderEUDAQ2.file_name={files[0]} -o EventLoaderEUDAQ2:TLU_0.file_name={files[1]} -o EventLoaderHDF5.filename={files[2]}   -o EventLoaderMuPixTelescope.input_file={files[3]} -l {log} '
+    cmd = f'corry -c {config} -o EventLoaderEUDAQ2.file_name={files[0]} -o EventLoaderEUDAQ2:TLU_0.file_name={files[1]} -o EventLoaderHDF5.filename={files[2]}   -o EventLoaderMuPixTelescope.input_file={files[3]} -l {log} '
     #cmd = f'./corry -c {config} -o EventLoaderEUDAQ2.file_name={files[0]} -o EventLoaderEUDAQ2:TLU_0.file_name={files[1]} -o EventLoaderHDF5.filename={files[2]} -l {log} '
     if additional:
         cmd += additional
@@ -37,12 +37,15 @@ def main():
     finalGeo = args.finalGeo
 
     # Directory paths where the data is stored
-    telDir = 'data/telescope'
-    tluDir = 'data/tlu'
-    dutDir = 'data/dut'
+    dataDir = os.environ.get("TB_DATA")
+    telDir = dataDir+'/telescope'
+    tluDir = dataDir+'/tlu'
+    dutDir = dataDir+'/dut'
 
     # List of directories where we need to search for files
     dirs = [telDir, tluDir]
+
+    os.system(f'/usr/bin/python3 find_masked_pixel_analysis.py {runNmb}')
 
     files = []
 
@@ -59,7 +62,7 @@ def main():
 
     # Globbing the DUT file based on the run number (converts to .h5 format)
     print(f'Globbing for DUT file with run number {runNmb:06}')
-    dut_file_found = glob(f'data/dut/module_0/chip_0/run{runNmb:06}_converted.h5')
+    dut_file_found = glob(dataDir+f'/dut/module_0/chip_0/run{runNmb:06}_converted.h5')
     if dut_file_found:
         files.append(dut_file_found[0])  # Append the first matched DUT file
     else:
@@ -68,7 +71,7 @@ def main():
 
     # Globbing the telepix2 block file for the given run number
     print(f'Globbing for telepix2 block file for run {runNmb:06}')
-    telepix_file_found = glob(f'data/telepix2/single_run_{runNmb:06}.blck')
+    telepix_file_found = glob(dataDir+f'/telepix2/single_run_{runNmb:06}.blck')
     if telepix_file_found:
        files.append(os.path.basename(telepix_file_found[0]))  # Append the block file
     else:

@@ -2,6 +2,7 @@ import numpy as np
 import tables as tb
 from pathlib import Path
 import yaml
+import os
 import glob
 import argparse
 
@@ -30,17 +31,17 @@ parser = argparse.ArgumentParser(description="Convert hit table to be compatible
 parser.add_argument("run", type=int, help="Number of run for which the mask file is created.")
 args = parser.parse_args()
 
-repo_path="/user/buch10/u14336/corry_config_desytb_2025"
+repo_path = os.environ.get("TB_DATA")
 
 if args.run:
     run_no = int(args.run)
 # # Standard usage
-folder_path = f'{repo_path}/conf/data_docker/dut/module_0/chip_0/'
+folder_path = f'../geo/mask_files_dut'
 # filepath_in = find_latest_file(folder_path, 'noise_occupancy_scan_interpreted.h5')
 
 # # Select the wanted file -- COMMENT FOR STANDARD USAGE
 # filepath_in = f"/home/bellevtx01/tb2025d/desy-tb-2025/data/dut/module_0/chip_0/run*{run_no}_*_ext_trigger_scan.h5"
-filepath_in = f"{repo_path}/conf/data_docker/dut/module_0/chip_0/run00{run_no}_*_ext_trigger_scan.h5"
+filepath_in = f"{repo_path}/dut/module_0/chip_0/run00{run_no}_*_ext_trigger_scan.h5"
 
 # Expand the wildcard using glob
 files = glob.glob(filepath_in)
@@ -71,6 +72,7 @@ print(disabled_pixels)
 
 # Standard usage
 print(folder_path + f"/run00{run_no}_masked_pixels.txt")
+os.makedirs(f"{folder_path}", exist_ok=True)
 with open(folder_path + f"/run00{run_no}_masked_pixels.txt", 'w') as file:
     # file.write('cols , rows\n')
     # for i in range(np.shape(disabled_pixels)[1]):
