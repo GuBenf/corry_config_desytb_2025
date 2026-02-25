@@ -13,7 +13,7 @@ def runCorry(config, files, log, additional=None):
         log: Log file where the output will be saved.
         additional: Optional string with additional arguments to pass to the Corry program.
     """
-    cmd = f'./corry -c {config} -o EventLoaderEUDAQ2.file_name={files[0]} -o EventLoaderEUDAQ2:TLU_0.file_name={files[1]} -o EventLoaderHDF5.filename={files[2]} -l {log} -o EventLoaderMuPixTelescope.input_file={files[3]} -l {log} '
+    cmd = f'corry -c {config} -o EventLoaderEUDAQ2.file_name={files[0]} -o EventLoaderEUDAQ2:TLU_0.file_name={files[1]} -o EventLoaderHDF5.filename={files[2]} -l {log} -o EventLoaderMuPixTelescope.input_file={files[3]} -l {log} '
     if additional:
         cmd += additional
     print(cmd)  
@@ -38,13 +38,15 @@ def main():
     if 'eudet' in config:
         config_dut_align = 'align_dut_eudet.conf'
 
-    data_path = '.'
-    repo_path="/home/testbeam1/corry_config_desytb_2025"
+    data_path = os.environ.get("TB_DATA")
+    repo_path= os.environ.get("TB_ANALYSIS")
+    print(data_path)
+    print(repo_path)
 
     # Directory paths where the data is stored
-    telDir = data_path+'/data/telescope'
-    tluDir = data_path+'/data/tlu'
-    dutDir = data_path+'/data/dut'
+    telDir = data_path+'/telescope'
+    tluDir = data_path+'/tlu'
+    dutDir = data_path+'/dut'
     mask_file_mimosa26_0 = f'{repo_path}/geo/mask_files/mask_MIMOSA26_0.txt'
     mask_file_mimosa26_1 = f'{repo_path}/geo/mask_files/mask_MIMOSA26_1.txt'
     mask_file_mimosa26_2 = f'{repo_path}/geo/mask_files/mask_MIMOSA26_2.txt'
@@ -70,8 +72,8 @@ def main():
     for runNmb in range(first, last + 1):
         geo_dut_aligned = geo[:-4] + f"_dut_aligned_{runNmb}.geo"
         geo_dut_pre_aligned = geo[:-4] + f"_dut_pre_aligned_{runNmb}.geo"
-        os.system(f'python3 find_masked_pixel_analysis.py {runNmb}')
-        mask_file = f'{repo_path}/conf/data/dut/module_0/chip_0/run{str(runNmb).zfill(6)}_masked_pixels.txt'
+        os.system(f'/usr/bin/python3 find_masked_pixel_analysis.py {runNmb}')
+        mask_file = f'{repo_path}/geo/mask_files_dut/run{str(runNmb).zfill(6)}_masked_pixels.txt'
 
         files = []
 
@@ -87,8 +89,8 @@ def main():
                 continue
 
         # Globbing for the DUT file
-        print(f'Globbing for DUT file with run number {runNmb:06}')
-        dut_file_found = glob(data_path+f'/data/dut/module_0/chip_0/run{runNmb:06}_converted.h5')
+        print(f'Globbing for DUT file with run number {runNmb:06} in {data_path}/dut/module_0/chip_0')
+        dut_file_found = glob(data_path+f'/dut/module_0/chip_0/run{runNmb:06}_converted.h5')
         if dut_file_found:
             files.append(dut_file_found[0])  # Append the first matched DUT file
         else:
@@ -98,7 +100,7 @@ def main():
 
         # Globbing for the telepix2 block file
         print(f'Globbing for telepix2 block file for run {runNmb:06}')
-        telepix_file_found = glob(data_path+f'/data_extension/telepix2/single_run_{runNmb:06}.blck')
+        telepix_file_found = glob(data_path+f'/telepix2/single_run_{runNmb:06}.blck')
         if telepix_file_found:
             files.append(os.path.basename(telepix_file_found[0]))  # Append the block file
         else:

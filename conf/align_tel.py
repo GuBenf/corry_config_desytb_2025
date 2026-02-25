@@ -13,7 +13,11 @@ def runCorry(config, files, log, additional=None):
         log: Log file where the output will be saved.
         additional: Optional string with additional arguments to pass to the Corry program.
     # """
-    cmd = f'corry -c {config} -o EventLoaderEUDAQ2.file_name={files[0]} -o EventLoaderEUDAQ2:TLU_0.file_name={files[1]} -o EventLoaderHDF5.filename={files[2]}   -o EventLoaderMuPixTelescope.input_file={files[3]} -l {log} '
+
+    dataDir = str(os.environ.get("TB_DATA"))
+    telepixDir = dataDir+'/telepix2'
+
+    cmd = f'corry -c {config} -o EventLoaderEUDAQ2.file_name={files[0]} -o EventLoaderEUDAQ2:TLU_0.file_name={files[1]} -o EventLoaderHDF5.filename={files[2]}   -o EventLoaderMuPixTelescope.input_file={files[3]} -o EventLoaderMuPixTelescope.input_directory={telepixDir} -l {log} '
     #cmd = f'./corry -c {config} -o EventLoaderEUDAQ2.file_name={files[0]} -o EventLoaderEUDAQ2:TLU_0.file_name={files[1]} -o EventLoaderHDF5.filename={files[2]} -l {log} '
     if additional:
         cmd += additional
@@ -48,11 +52,11 @@ def main():
     tel_id = args.tel_id
 
     # Directory paths where the data is stored
-    dataDir = os.environ.get("TB_DATA")
+    dataDir = str(os.environ.get("TB_DATA"))
     telDir = dataDir+'/telescope'
     tluDir = dataDir+'/tlu'
     dutDir = dataDir+'/dut'
-
+    
     # List of directories where we need to search for files
     dirs = [telDir, tluDir]
 
@@ -101,7 +105,9 @@ def main():
     it2root = increase_iteration(root_file_template)
     runCorry('align_tel.conf', files, 'logs/log_align_tel.txt', f'-o detectors_file={geo_file_template} -o detectors_file_updated={it2file} -o number_of_tracks=50000 -o histogram_file={it2root}')
     it3root = increase_iteration(it2root)
-    runCorry('align_mille.conf', files, 'logs/log_align_mille.txt', f'-o detectors_file={it2file} -o detectors_file_updated={finalGeo} -o number_of_tracks=50000 -o histogram_file={it3root}')
+    it3file = increase_iteration(it2file)
+    runCorry('align_mille.conf', files, 'logs/log_align_mille.txt', f'-o detectors_file={it2file} -o detectors_file_updated={it3file} -o number_of_tracks=50000 -o histogram_file={it3root}')
+    runCorry('align_dut.conf', files, 'logs/log_align_dut.txt', f'-o detectors_file={it3file} -o detectors_file_updated={finalGeo} -o number_of_tracks=50000 -o histogram_file={it3root}')
 
 if __name__ == "__main__":
     main()
