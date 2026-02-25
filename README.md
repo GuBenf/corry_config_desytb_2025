@@ -7,6 +7,9 @@ Alignment: run `full_align.sh` for each geo_id (telescope and DUT alignment) and
 Masking: run `mask_generator.sh` which generates a mask file from a default mask (masking not used frontends) and a yaml file (list of disabeled pixels in the data taking). Please nothe that the default masks do not work for all runs since the frontends were also changed within geo_ids! These masks were adapted by hand and a set of working masks is stored under initial_masks.
 
 Analysis: is done using jobsub which is installed under your corry installation (see corry manual and below). A csv file has to be created with `data_searcher.sh` which contains information of geo and data for each run before starting the analysis.
+
+TO BE CHANGED: At the moment, you have to source .bashrc to define some global paths (HOME, TB_DATA, TB_ANALYSIS). Remember to change them accordingly!
+
 ## Software
 
 Root: 6.24/06, ROOT 6.26/10 seem to work both.
